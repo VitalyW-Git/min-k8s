@@ -17,11 +17,18 @@ spec:
       containers:
         - image: adminvitcon/my-nginx-app:0.0.1
           name: nginx
+          ports:
+            - containerPort: 80
           volumeMounts:
             - mountPath: /etc/nginx/conf.d
               name: nginx-config
+            - mountPath: /app
+              name: app-volume
         - image: adminvitcon/my-php-app:0.0.1
           name: php
+          volumeMounts:
+            - mountPath: /app
+              name: app-volume
       volumes:
         - name: nginx-config
           configMap:
@@ -29,3 +36,5 @@ spec:
             items:
               - key: config
                 path: default.conf
+        - name: app-volume
+          emptyDir: { }
