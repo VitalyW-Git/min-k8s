@@ -15,7 +15,7 @@ spec:
         app: php-multiple-container
     spec:
       containers:
-        - image: adminvitcon/my-nginx-app:0.0.1
+        - image: adminvitcon/my-nginx-app:0.0.2
           name: nginx
           ports:
             - containerPort: 80
@@ -37,4 +37,6 @@ spec:
               - key: config
                 path: default.conf
         - name: app-volume
-          emptyDir: { }
+#          emptyDir: { }
+          hostPath:
+            path: /app
