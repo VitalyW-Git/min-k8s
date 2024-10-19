@@ -32,11 +32,10 @@ spec:
       volumes:
         - name: nginx-config
           configMap:
-            name: nginx-config
+            name: nginx-config-map
             items:
               - key: config
                 path: default.conf
         - name: app-volume
-#          emptyDir: { }
-          hostPath:
-            path: /app
+          persistentVolumeClaim:
+            claimName: pvc

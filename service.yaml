@@ -22,3 +22,21 @@ spec:
       nodePort: 30001  # Укажите нужный вам порт для доступа
   selector:
     app: php-multiple-container
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+spec:
+  ingressClassName: "nginx"
+  rules:
+    - host: "skeleton.local"
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80

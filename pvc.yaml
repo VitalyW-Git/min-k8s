@@ -1,20 +1,39 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner:  kubernetes.com/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: pv
 spec:
   capacity:
-    storage: 1Gi
+    storage: 5Gi
+  volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: /home/home/sites/kub8s/min-k8s
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /app
+  nodeAffinity: # PV будет доступен только на узле minikube
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: pvc
 spec:
+  storageClassName: local-storage # обязательное
   accessModes:
     - ReadWriteOnce
   resources:
