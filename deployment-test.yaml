@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: production
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+        - name: init-files
+          image: php-backend
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-c", "cp -r /usr/src/app/. /var/www/api && chown -R www-data:www-data /var/www/api"]
+          volumeMounts:
+            - name: env-config-volume
+              mountPath: /usr/src/app/.env
+              subPath: .env
+            - mountPath: /var/www/api
+              name: php-files
+      containers:
+        - name: backend
+          image: php-backend
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app
+              name: php-files
+            - name: nginx-config-volume
+              mountPath: /usr/local/etc/php/conf.d/docker-php.ini
+              subPath: docker-php.ini
+            - name: nginx-config-volume
+              mountPath: /usr/local/etc/php-fpm.d/zz-docker.conf
+              subPath: zz-docker.conf
+        - name: nginx
+          image: nginx:1.21.1-alpine
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /app
+              name: php-files
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: nginx-config-volume
+              mountPath: /usr/local/etc/php/conf.d/docker-php.ini
+              subPath: docker-php.ini
+      volumes:
+        - emptyDir: {}
+          name: php-files
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-config
+        - name: env-config-volume
+          configMap:
+            name: backend-config
+
+
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: backend
+#  namespace: production
+#  labels:
+#    app: backend
+#spec:
+#  selector:
+#    matchLabels:
+#      app: backend
+#  template:
+#    metadata:
+#      labels:
+#        app: backend
+#    spec:
+#      initContainers:
+#        - name: init-files
+#          image: php-backend
+#          imagePullPolicy: Always
+#          command: ["/bin/sh", "-c", "cp -r /usr/src/app/. /var/www/api && chown -R www-data:www-data /var/www/api"]
+#          volumeMounts:
+#            - name: env-config-volume
+#              mountPath: /usr/src/app/.env
+#              subPath: .env
+#            - mountPath: /var/www/api
+#              name: php-files
+#      containers:
+#        - name: backend
+#          image: php-backend
+#          imagePullPolicy: Always
+#          volumeMounts:
+#            - mountPath: /var/www/api
+#              name: php-files
+#            - name: nginx-config-volume
+#              mountPath: /usr/local/etc/php/conf.d/docker-php.ini
+#              subPath: docker-php.ini
+#            - name: nginx-config-volume
+#              mountPath: /usr/local/etc/php-fpm.d/zz-docker.conf
+#              subPath: zz-docker.conf
+#        - name: nginx
+#          image: nginx:1.21.1-alpine
+#          imagePullPolicy: Always
+#          ports:
+#            - containerPort: 80
+#          volumeMounts:
+#            - mountPath: /var/www/api
+#              name: php-files
+#            - name: nginx-config-volume
+#              mountPath: /etc/nginx/nginx.conf
+#              subPath: nginx.conf
+#            - name: nginx-config-volume
+#              mountPath: /usr/local/etc/php/conf.d/docker-php.ini
+#              subPath: docker-php.ini
+#      imagePullSecrets:
+#        - name: regcred
+#      volumes:
+#        - emptyDir: {}
+#          name: php-files
+#        - name: nginx-config-volume
+#          configMap:
+#            name: nginx-config
+#        - name: env-config-volume
+#          configMap:
+#            name: backend-config

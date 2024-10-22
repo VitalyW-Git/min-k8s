@@ -15,17 +15,27 @@ spec:
         app: php-multiple-container
     spec:
       containers:
-        - image: adminvitcon/my-nginx-app:0.0.1
-          name: nginx
-          volumeMounts:
-            - mountPath: /etc/nginx/conf.d
-              name: nginx-config
         - image: adminvitcon/my-php-app:0.0.1
           name: php
+          volumeMounts:
+            - name: app-volume
+              mountPath: /app
+        - image: adminvitcon/my-nginx-app:0.0.2
+          name: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+            - name: app-volume
+              mountPath: /app
       volumes:
         - name: nginx-config
           configMap:
-            name: nginx-config
+            name: nginx-config-map
             items:
               - key: config
                 path: default.conf
+        - name: app-volume
+          persistentVolumeClaim:
+            claimName: pvc

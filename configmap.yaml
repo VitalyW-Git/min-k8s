@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-config
+  name: nginx-config-map
 data:
   config : |
     server {
@@ -21,7 +21,7 @@ data:
                 return 404;
             }
             include fastcgi_params;
-            fastcgi_pass localhost:9000;
+            fastcgi_pass php-service:9000;
             fastcgi_index index.php;
             fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
             fastcgi_param DOCUMENT_ROOT $realpath_root;
